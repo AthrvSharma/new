@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Attendance & Task Management System</title>
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f0f4f7;
+        color: #343a40;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      #app {
+        max-width: 900px;
+        margin: auto;
+        background-color: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      h1, h2, h3 {
+        text-align: center;
+        color: #007bff;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      h2 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+      }
+
+      h3 {
+        font-size: 1.5rem;
+        margin-top: 30px;
+      }
+
+      #logo {
+        display: block;
+        margin: 0 auto 20px auto;
+        width: 190px;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      input, select, button {
+        width: 100%;
+        padding: 15px;
+        margin-top: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+      }
+
+      input:focus, select:focus {
+        border-color: #007bff;
+        outline: none;
+      }
+
+      button {
+        background-color: #007bff;
+        color: white;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        border: none;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      .error-message {
+        color: red;
+        margin-top: 10px;
+        text-align: center;
+      }
+
+      .attendance-message {
+        color: green;
+        margin-top: 10px;
+        text-align: center;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #000000;
+        color: white;
+      }
+
+      @media screen and (max-width: 768px) {
+        #app {
+          padding: 20px;
+        }
+
+        h1 {
+          font-size: 1.8rem;
+        }
+
+        h2 {
+          font-size: 1.6rem;
+        }
+
+        h3 {
+          font-size: 1.4rem;
+        }
+
+        input, select, button {
+          padding: 12px;
+          font-size: 0.9rem;
+        }
+      }
+
+      @media screen and (max-width: 480px) {
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        h2 {
+          font-size: 1.4rem;
+        }
+
+        h3 {
+          font-size: 1.2rem;
+        }
+
+        input, select, button {
+          padding: 10px;
+          font-size: 0.85rem;
+        }
+
+        #logo {
+          width: 200px;
+          height: 200px;
+        }
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <img src="company-high-resolution-logo-black-transparent.png" alt="XYZ Company Logo" id="logo" />
+      <h1>Attendance & Task Management System</h1>
+      <hr />
+      <div id="login" class="form-container">
+        <h2>LOGIN</h2>
+        <select id="userType">
+          <option value="employee">Employee</option>
+          <option value="admin">Admin</option>
+        </select>
+        <br /><br />
+        <input
+          type="text"
+          id="username"
+          placeholder="Your Name / Employee ID, e.g., 101/admin"
+          required
+        />
+        <input
+          type="password"
+          id="password"
+          placeholder="Password, e.g., employee/admin"
+          required
+        />
+        <button onclick="login()">Login</button>
+        <div id="error-message" class="error-message"></div>
+      </div>
+
+      <div id="employeeDashboard" class="hidden">
+        <h2>Welcome, <span id="employeeName"></span></h2>
+        <h3>Mark Attendance</h3>
+        <input type="text" id="employeeId" placeholder="Your Employee ID" required />
+        <button onclick="markAttendance()">Mark Attendance</button>
+        <div id="attendanceMessage" class="attendance-message"></div>
+
+        <div class="task-section">
+          <h3>Assigned Tasks</h3>
+          <ul id="taskList"></ul>
+          <button onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <div id="adminDashboard" class="hidden">
+        <h2>Admin Dashboard</h2>
+        <h3>Attendance Records</h3>
+        <table id="attendanceTable">
+          <thead>
+            <tr>
+              <th>Employee Name</th>
+              <th>Employee ID</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="attendanceBody"></tbody>
+        </table>
+
+        <div>
+          <canvas id="attendancePieChart" width="400" height="400"></canvas>
+        </div>
+
+        <div class="task-section">
+          <h3>Assign Work</h3>
+          <input type="text" id="taskEmployeeId" placeholder="Employee ID" required />
+          <input type="text" id="taskDescription" placeholder="Task Description" required />
+          <input type="date" id="taskDate" required />
+          <button onclick="assignTask()">Assign Task</button>
+
+          <h3>Tasks Overview</h3>
+          <ul id="taskOverview"></ul>
+          <button onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const employees = [
+        { id: "emp1", name: "Athrv Sharma" },
+        { id: "emp2", name: "Arav Kumar" },
+        { id: "emp3", name: "Amit" },
+        { id: "emp4", name: "Ram" },
+        { id: "emp5", name: "Karan" },
+      ];
+
+      let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+      function login() {
+        const userType = document.getElementById("userType").value;
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        if (userType === "admin" && username === "admin" && password === "admin") {
+          localStorage.setItem("role", "admin");
+          switchToAdminDashboard();
+          return;
+        }
+        const employee = employees.find((emp) => emp.id === username && password === "employee");
+        if (employee) {
+          localStorage.setItem("role", "employee");
+          localStorage.setItem("employeeName", employee.name);
+          localStorage.setItem("employeeId", employee.id);
+          switchToEmployeeDashboard(employee.name);
+        } else {
+          document.getElementById("error-message").innerText = "Invalid credentials! Please try again.";
+        }
+      }
+
+      function switchToEmployeeDashboard(employeeName) {
+        document.getElementById("login").classList.add("hidden");
+        document.getElementById("employeeDashboard").classList.remove("hidden");
+        document.getElementById("employeeName").innerText = employeeName;
+        displayTasksForEmployee(localStorage.getItem('employeeId'));
+      }
+
+      function switchToAdminDashboard() {
+        document.getElementById("login").classList.add("hidden");
+        document.getElementById("adminDashboard").classList.remove("hidden");
+        viewAttendance();
+        displayAllTasks();
+        drawAttendancePieChart(); 
+      }
+
+      function markAttendance() {
+        const employeeId = document.getElementById("employeeId").value.trim();
+        const employee = employees.find((emp) => emp.id === employeeId);
+        if (employee) {
+          const attendanceRecord = {
+            name: employee.name,
+            id: employeeId,
+            status: "Present",
+            date: new Date().toLocaleDateString(),
+          };
+          const attendanceList = JSON.parse(localStorage.getItem("attendanceList")) || [];
+          attendanceList.push(attendanceRecord);
+          localStorage.setItem("attendanceList", JSON.stringify(attendanceList));
+          document.getElementById("attendanceMessage").innerText = "Attendance marked successfully!";
+          setTimeout(() => {
+            document.getElementById("attendanceMessage").innerText = "";
+          }, 2000);
+        } else {
+          document.getElementById("attendanceMessage").innerText = "Invalid Employee ID.";
+        }
+      }
+
+      function viewAttendance() {
+        const attendanceBody = document.getElementById("attendanceBody");
+        attendanceBody.innerHTML = "";
+        const attendanceList = JSON.parse(localStorage.getItem("attendanceList")) || [];
+        attendanceList.forEach((record) => {
+          const row = `<tr>
+                        <td>${record.name}</td>
+                        <td>${record.id}</td>
+                        <td>${record.status}</td>
+                        <td>${record.date}</td>
+                      </tr>`;
+          attendanceBody.innerHTML += row;
+        });
+      }
+
+      function assignTask() {
+        const employeeId = document.getElementById("taskEmployeeId").value.trim();
+        const taskDescription = document.getElementById("taskDescription").value.trim();
+        const taskDate = document.getElementById("taskDate").value;
+
+        const newTask = {
+          employeeId: employeeId,
+          description: taskDescription,
+          date: taskDate,
+          completed: false,
+        };
+
+        tasks.push(newTask);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        document.getElementById("taskEmployeeId").value = "";
+        document.getElementById("taskDescription").value = "";
+        document.getElementById("taskDate").value = "";
+        displayAllTasks(); 
+      }
+
+      function displayTasksForEmployee(employeeId) {
+        const taskList = document.getElementById("taskList");
+        taskList.innerHTML = "";
+        const employeeTasks = tasks.filter((task) => task.employeeId === employeeId);
+        if (employeeTasks.length > 0) {
+          employeeTasks.forEach((task, index) => {
+            const li = document.createElement("li");
+            const isCompleted = task.completed ? " (Completed)" : "";
+            li.innerHTML = `Task: ${task.description} (Due: ${task.date})${isCompleted}`;
+            
+            if (!task.completed) {
+              const markDoneButton = document.createElement("button");
+              markDoneButton.innerText = "Mark as Done";
+              markDoneButton.onclick = () => markTaskAsDone(index, employeeId);
+              li.appendChild(markDoneButton);
+            }
+
+            taskList.appendChild(li);
+          });
+        } else {
+          taskList.innerText = "No tasks assigned yet.";
+        }
+      }
+
+      function markTaskAsDone(taskIndex, employeeId) {
+        tasks[taskIndex].completed = true;
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        displayTasksForEmployee(employeeId);
+        displayAllTasks();
+      }
+
+      function displayAllTasks() {
+        const taskOverview = document.getElementById("taskOverview");
+        taskOverview.innerHTML = "";
+        tasks.forEach((task) => {
+          const li = document.createElement("li");
+          const isCompleted = task.completed ? " (Completed)" : " (Pending)";
+          li.innerText = `Task for Employee ${task.employeeId}: ${task.description} (Due: ${task.date})${isCompleted}`;
+          taskOverview.appendChild(li);
+        });
+      }
+
+      function logout() {
+
+  localStorage.removeItem("role");
+  localStorage.removeItem("employeeName");
+  localStorage.removeItem("employeeId");
+  location.reload(); 
+}
+
+
+      function drawAttendancePieChart() {
+        const attendanceList = JSON.parse(localStorage.getItem("attendanceList")) || [];
+        const presentCount = attendanceList.filter((record) => record.status === "Present").length;
+        const absentCount = employees.length - presentCount;
+
+        const ctx = document.getElementById("attendancePieChart").getContext("2d");
+        new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: ["Present", "Absent"],
+            datasets: [
+              {
+                data: [presentCount, absentCount],
+                backgroundColor: ["#007bff", "#dc3545"],
+              },
+            ],
+          },
+        });
+      }
+    </script>
+  </body>
+</html>
